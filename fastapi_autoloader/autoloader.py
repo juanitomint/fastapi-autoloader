@@ -1,6 +1,5 @@
 import glob
 import importlib.util
-import os
 import logging
 
 from fastapi import APIRouter, FastAPI
@@ -15,9 +14,7 @@ class AutoLoader:
             # Create a basic logger if none is provided
             logger = logging.getLogger("DynamicRouter")
             handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-            )
+            formatter = logging.Formatter("%(levelname)s:     %(message)s")
             handler.setFormatter(formatter)
             logger.addHandler(handler)
             logger.setLevel(logging.DEBUG)
@@ -26,7 +23,6 @@ class AutoLoader:
     def load(self, app: FastAPI):
         py_files = glob.glob(f"{self.target_dir}/**/[!__]*.py", recursive=True)
         for target_name in py_files:
-            target_path = os.path.dirname(target_name)
             import_name = target_name.replace("/", ".").replace(".py", "")
 
             spec = importlib.util.spec_from_file_location(
@@ -38,7 +34,7 @@ class AutoLoader:
                 if hasattr(module, "router") and isinstance(module.router, APIRouter):
                     app.include_router(module.router)
                     self.modules.append(target_name)
-                    logger.debug(f"Loaded router from {target_name}")
+                    self.logger.debug(f"Loaded router from {target_name}")
 
         self.logger.debug(
             f"DynamicRouter loaded {len(self.modules)} modules from {self.target_dir}"

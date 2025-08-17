@@ -48,7 +48,11 @@ cover/xml: ## Creates coverage Report
 .PHONY: semantic-release-version
 semantic-release-version: ## Run python-semantic-release to calculate version
 	poetry run python -m semantic_release version
-	
+
+.PHONY: run
+run:
+	uvicorn example.main:app --reload --port=8000
+
 .PHONY: clean
 clean: ## Clean up local environment and caches
 	rm -rf ./.venv
